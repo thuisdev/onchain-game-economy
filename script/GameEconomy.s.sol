@@ -23,7 +23,7 @@ contract DeployGameEconomy is Script {
 
         vm.startBroadcast(deployer);
 
-        // GE-1: deploy implementation + UUPS proxy and call initialize once
+        // Deploy implementation + UUPS proxy and call initialize once
         proxy = Upgrades.deployUUPSProxy(
             "GameEconomy.sol",
             abi.encodeCall(GameEconomy.initialize, (deployer, deployer, deployer, deployer, BASE_URI, CURRENCY_PRICE))
@@ -31,11 +31,11 @@ contract DeployGameEconomy is Script {
 
         GameEconomy game = GameEconomy(proxy);
 
-        // GE-5: material prices in currency units
+        // Material prices in currency units
         game.setMaterialPrice(WOOD, 5);
         game.setMaterialPrice(IRON, 10);
 
-        // GE-7: recipe = 2 wood + 3 iron
+        // Recipe = 2 wood + 3 iron
         uint256[] memory ids = new uint256[](2);
         ids[0] = WOOD;
         ids[1] = IRON;

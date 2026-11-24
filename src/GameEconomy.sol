@@ -33,7 +33,6 @@ contract GameEconomy is
     // Constants
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-1: Roles
     /// @notice Role allowed to pause and unpause the game.
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
@@ -43,14 +42,14 @@ contract GameEconomy is
     /// @notice Role allowed to manage material prices and recipes.
     bytes32 public constant GAME_ADMIN_ROLE = keccak256("GAME_ADMIN_ROLE");
 
-    // GE-1: Currency ID 0, material IDs start at 1, crafted items start at FIRST_UNIQUE_ID
+    // Currency ID 0, material IDs start at 1, crafted items start at FIRST_UNIQUE_ID
     /// @notice Token ID of the fungible in-game currency.
     uint256 public constant CURRENCY_ID = 0;
 
     /// @notice First token ID used for crafted items. Material IDs must be below this value.
     uint256 public constant FIRST_UNIQUE_ID = 1_000_000;
 
-    // GE-9: Bounds the number of materials per recipe so crafting never loops unbounded
+    // Bounds the number of materials per recipe so crafting never loops unbounded
     /// @notice Maximum number of different materials a recipe can require.
     uint256 public constant MAX_RECIPE_SIZE = 5;
 
@@ -61,12 +60,12 @@ contract GameEconomy is
     /// @notice Price of one currency unit in wei.
     uint256 public currencyPrice;
 
-    // GE-5: Material prices in currency units
+    // Material prices in currency units
     /// @notice Price of one unit of a material, denominated in currency units.
     /// @dev A price of 0 means the material does not exist.
     mapping(uint256 materialId => uint256 price) public materialPrice;
 
-    // GE-7: Active recipe stored as two parallel arrays (index i = material + amount)
+    // Active recipe stored as two parallel arrays (index i = material + amount)
     /// @dev Material IDs required by the active recipe.
     uint256[] private _recipeMaterialIds;
 
@@ -165,7 +164,7 @@ contract GameEconomy is
     // External – initializer
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-1: Initialize once – roles, base URI, currency price and first crafted ID
+    // Initialize once – roles, base URI, currency price and first crafted ID
     /// @notice Initializes the game economy behind the proxy. Can only be called once.
     /// @dev Replaces the constructor for upgradeable contracts. Reverts with ZeroAddress
     ///      if any role address is zero and with ZeroAmount if the currency price is zero.
@@ -209,7 +208,7 @@ contract GameEconomy is
     // External – payable
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-3: Fixed-price ETH sale – mints currency ID 0, ETH stays in the contract
+    // Fixed-price ETH sale – mints currency ID 0, ETH stays in the contract
     /// @notice Buy in-game currency with ETH at the fixed `currencyPrice`.
     /// @dev Emits CurrencyBought. Reverts if paused, if `amount` is zero or if
     ///      `msg.value` does not equal `amount * currencyPrice`. Minting triggers the
@@ -235,7 +234,7 @@ contract GameEconomy is
     // External – state-changing
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-4: Admin ETH withdrawal (CEI, nonReentrant, not paused)
+    // Admin ETH withdrawal (CEI, nonReentrant, not paused)
     /// @notice Withdraw ETH collected from currency sales.
     /// @dev Emits Withdrawn. Only DEFAULT_ADMIN_ROLE. Reverts if paused, if `to` is the
     ///      zero address, if `amount` is zero, if the contract balance is too low or if
@@ -264,7 +263,7 @@ contract GameEconomy is
         emit Withdrawn(to, amount);
     }
 
-    // GE-5: Role-gated material price updates
+    // Role-gated material price updates
     /// @notice Set or update the currency price of a material.
     /// @dev Emits MaterialPriceSet. Only GAME_ADMIN_ROLE. Reverts with InvalidMaterial if
     ///      `materialId` is 0 or >= FIRST_UNIQUE_ID, and with ZeroAmount if `price` is zero.
@@ -282,7 +281,7 @@ contract GameEconomy is
         emit MaterialPriceSet(materialId, price);
     }
 
-    // GE-6: Burn currency, mint materials
+    // Burn currency, mint materials
     /// @notice Buy materials by spending in-game currency.
     /// @dev Emits MaterialPurchased. Burns `amount * materialPrice[materialId]` currency
     ///      from the caller and mints `amount` of the material. Reverts if paused, if
@@ -314,12 +313,12 @@ contract GameEconomy is
         emit MaterialPurchased(msg.sender, materialId, amount, cost);
     }
 
-    // GE-7: Role-gated recipe – replaces the single active recipe
+    // Role-gated recipe – replaces the single active recipe
     /// @notice Replace the active crafting recipe.
     /// @dev Emits RecipeSet. Only GAME_ADMIN_ROLE. Reverts with InvalidRecipe if the arrays
     ///      are empty, longer than MAX_RECIPE_SIZE, of different length or contain a zero
     ///      amount, and with InvalidMaterial if an ID is not a priced material.
-    ///      The loop is bounded by MAX_RECIPE_SIZE (GE-9).
+    ///      The loop is bounded by MAX_RECIPE_SIZE.
     /// @param materialIds Material IDs required by the recipe.
     /// @param amounts     Required amount per material (same index as `materialIds`).
     function setRecipe(uint256[] calldata materialIds, uint256[] calldata amounts) external onlyRole(GAME_ADMIN_ROLE) {
@@ -349,7 +348,7 @@ contract GameEconomy is
         emit RecipeSet(materialIds, amounts);
     }
 
-    // GE-8: Burn recipe materials, mint unique item with supply 1
+    // Burn recipe materials, mint unique item with supply 1
     /// @notice Craft a unique item by burning the materials of the active recipe.
     /// @dev Emits Crafted. Burns all recipe materials in one `_burnBatch` call (reverts if
     ///      the caller lacks any material), mints `nextUniqueId` with supply 1 and
@@ -378,14 +377,14 @@ contract GameEconomy is
         emit Crafted(msg.sender, itemId);
     }
 
-    // GE-2: Role-gated pause
+    // Role-gated pause
     /// @notice Pause currency purchases, material purchases, crafting and withdrawals.
     /// @dev Only PAUSER_ROLE. Emits Paused (from PausableUpgradeable).
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    // GE-2: Role-gated unpause
+    // Role-gated unpause
     /// @notice Resume all paused game actions.
     /// @dev Only PAUSER_ROLE. Emits Unpaused (from PausableUpgradeable).
     function unpause() external onlyRole(PAUSER_ROLE) {
@@ -425,7 +424,7 @@ contract GameEconomy is
     // Internal
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-1: Only UPGRADER_ROLE can upgrade the UUPS proxy
+    // Only UPGRADER_ROLE can upgrade the UUPS proxy
     /// @dev Called by `upgradeToAndCall`. Reverts unless the caller has UPGRADER_ROLE.
     /// @param newImplementation Address of the new implementation (unused, required by UUPS).
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}

@@ -72,10 +72,9 @@ contract GameEconomyTest is Test {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Required by spec
+    // Core flows
     // ─────────────────────────────────────────────────────────────────────────
 
-    // Spec: Paying currency mints the correct materials (GE-3, GE-6)
     function test_buyMaterial_withCurrency_mintsCorrectMaterials() public {
         _buyCurrency(_player, 20);
 
@@ -86,7 +85,6 @@ contract GameEconomyTest is Test {
         assertEq(_gameEconomy.balanceOf(_player, _gameEconomy.CURRENCY_ID()), 0, "currency not burned");
     }
 
-    // Spec: Crafting burns required materials and mints a unique item (GE-8)
     function test_craft_withMaterials_burnsRecipeAndMintsUniqueItem() public {
         _buyRecipeMaterials(_player);
         uint256 firstUniqueId = _gameEconomy.FIRST_UNIQUE_ID();
@@ -107,7 +105,6 @@ contract GameEconomyTest is Test {
         assertEq(_gameEconomy.nextUniqueId(), firstUniqueId + 1, "counter not incremented");
     }
 
-    // Spec: Pause blocks purchases and crafting (GE-2)
     function test_pause_blocksPurchasesAndCrafting() public {
         _buyRecipeMaterials(_player);
 
@@ -126,7 +123,6 @@ contract GameEconomyTest is Test {
         vm.stopPrank();
     }
 
-    // Spec: Deploy V1, run an end-to-end buy -> craft workflow
     function test_endToEnd_buyCurrency_buyMaterials_craft() public {
         uint256 currencyId = _gameEconomy.CURRENCY_ID();
 
@@ -159,7 +155,6 @@ contract GameEconomyTest is Test {
         assertEq(_gameEconomy.balanceOf(_player, itemId), 1, "item not minted");
     }
 
-    // Spec: Upgrading to V2 preserves state (GE-10)
     function test_upgrade_toV2_preservesState() public {
         // build up some V1 state
         _buyRecipeMaterials(_player);
@@ -183,7 +178,6 @@ contract GameEconomyTest is Test {
         assertEq(amounts[1], RECIPE_IRON, "recipe amounts lost");
     }
 
-    // Spec: V2 feature works – batch purchase with a single currency burn (GE-10)
     function test_v2_buyMaterialsBatch_mintsAllMaterials() public {
         GameEconomyV2 implementationV2 = new GameEconomyV2();
         vm.prank(_upgrader);
@@ -212,14 +206,12 @@ contract GameEconomyTest is Test {
     // Edge cases
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-3: exact payment required
     function test_buyCurrency_wrongPayment_revertsIncorrectPayment() public {
         vm.prank(_player);
         vm.expectRevert(abi.encodeWithSelector(GameEconomy.IncorrectPayment.selector, CURRENCY_PRICE, 1));
         _gameEconomy.buyCurrency{value: 1}(1);
     }
 
-    // GE-5: only GAME_ADMIN_ROLE can set prices
     function test_setMaterialPrice_nonGameAdmin_reverts() public {
         // Read the role BEFORE vm.prank – otherwise this call would consume the prank.
         bytes32 role = _gameEconomy.GAME_ADMIN_ROLE();

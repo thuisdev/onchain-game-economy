@@ -17,7 +17,7 @@ contract UpgradeGameEconomy is Script {
         console.log("Old implementation:", Upgrades.getImplementationAddress(proxy));
 
         vm.startBroadcast(deployer);
-        // GE-10: deploy V2 implementation and point the proxy to it (state is kept)
+        // Deploy V2 implementation and point the proxy to it (state is kept)
         Upgrades.upgradeProxy(proxy, "GameEconomyV2.sol", "");
         vm.stopBroadcast();
 

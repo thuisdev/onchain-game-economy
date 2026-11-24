@@ -15,8 +15,6 @@ losing any state.
 
 **Stack:** Solidity 0.8.24 · Foundry · OpenZeppelin Contracts Upgradeable v5 · UUPS · Sepolia
 
-> Built as part of Metana's Full Stack Web3 Bootcamp.
-
 ---
 
 ## Economy Design
@@ -130,8 +128,8 @@ instead of `ERC1155Pausable`, which would also block normal transfers between pl
 **Unique IDs never reused.** `nextUniqueId` starts at `1_000_000`, is incremented before minting,
 and `craft()` additionally checks `!exists(itemId)` via `ERC1155Supply`.
 
-**ETH withdrawal.** The spec required an admin ETH withdrawal, which only makes sense if ETH
-actually flows into the contract – one more reason for the fixed-price currency sale over a faucet.
+**ETH withdrawal.** An admin ETH withdrawal only makes sense if ETH actually flows into the
+contract – one more reason for the fixed-price currency sale over a faucet.
 
 ---
 

@@ -17,7 +17,7 @@ contract GameEconomyV2 is GameEconomy {
     // Constants
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-9 / GE-10: bounds the batch loop so it can never grow unbounded
+    // Bounds the batch loop so it can never grow unbounded
     /// @notice Maximum number of entries in one batch purchase.
     uint256 public constant MAX_BATCH_SIZE = 10;
 
@@ -51,13 +51,13 @@ contract GameEconomyV2 is GameEconomy {
     // External – state-changing
     // ─────────────────────────────────────────────────────────────────────────
 
-    // GE-10: Buy multiple materials in one transaction with a single currency burn
+    // Buy multiple materials in one transaction with a single currency burn
     /// @notice Buy several materials at once, paying the total in currency.
     /// @dev Emits MaterialsBatchPurchased. Sums the cost of all entries, burns that total
     ///      once and mints all materials with one `_mintBatch`. Reverts if paused, if the
     ///      batch is empty, too large or has mismatched arrays, if an amount is zero, if a
     ///      material has no price or if the caller's currency balance is too low.
-    ///      The loop is bounded by MAX_BATCH_SIZE (GE-9).
+    ///      The loop is bounded by MAX_BATCH_SIZE.
     /// @param materialIds IDs of the materials to buy.
     /// @param amounts     Number of units per material (same index as `materialIds`).
     /// @return totalCost  Total currency units burned.
